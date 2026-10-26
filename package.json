@@ -1,0 +1,18 @@
+{
+  "name": "ynu-heritage-3d",
+  "version": "1.0.0",
+  "description": "3D 版云南大学历史人物寻访：从会泽院到至公堂 (A 3D tour of Yunnan University history)",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "three": "^0.180.0",
+    "vite": "^7.3.7"
+  },
+  "type": "module"
+}
