@@ -30,10 +30,10 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 container.appendChild(renderer.domElement);
 
-const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, .08, 300);
-camera.position.set(58, 44, 72);
+const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, .08, 320);
+camera.position.set(56, 46, 96);
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.target.set(0, 1.2, 6);
+controls.target.set(0, 1.2, 18);
 controls.enableDamping = true;
 controls.dampingFactor = .065;
 controls.minDistance = 5;
@@ -255,8 +255,11 @@ function setControlMode(mode, reposition = true) {
   if (roaming && reposition) {
     if (sceneMode === 'exterior') {
       if (selected.id === 'zhigong') {
-        camera.position.set(-28, 1.72, 15.5);
-        controls.target.set(-28, 2.1, 10);
+        camera.position.set(0, 1.72, -16.5);
+        controls.target.set(0, 2.1, -21);
+      } else if (selected.id === 'lake') {
+        camera.position.set(0, 1.72, 58);
+        controls.target.set(0, 1.9, 64);
       } else {
         camera.position.set(selected.focus[0], 1.72, selected.focus[2] + 8);
         controls.target.set(selected.focus[0], 1.72, selected.focus[2]);
@@ -346,7 +349,7 @@ function goOverview() {
     focusInterior('overview');
   } else {
     if (controlMode === 'roam') setControlMode('orbit', false);
-    flyTo([58, 44, 72], [0, 1.2, 6], 1600);
+    flyTo([56, 46, 96], [0, 1.2, 18], 1600);
   }
 }
 
@@ -512,11 +515,11 @@ function updateRoaming(delta) {
   const movement = moveVector.multiplyScalar(forwardAmount).add(right.multiplyScalar(sideAmount)).normalize().multiplyScalar(speed);
   const next = camera.position.clone().add(movement);
   if (sceneMode === 'exterior') {
-    next.x = THREE.MathUtils.clamp(next.x, -58, 58);
-    next.z = THREE.MathUtils.clamp(next.z, -46, 50);
-    // 翠湖水面不可进入（湖心区）
-    const inLake = next.x > 18 && next.x < 50 && next.z > 17 && next.z < 35;
-    const onBridge = Math.abs(next.x - 34) < 1.8;
+    next.x = THREE.MathUtils.clamp(next.x, -62, 62);
+    next.z = THREE.MathUtils.clamp(next.z, -42, 82);
+    // 翠湖水面不可进入（南门外湖心区，石桥可通）
+    const inLake = next.z > 55 && Math.abs(next.x) < 26;
+    const onBridge = Math.abs(next.x) < 2;
     if (inLake && !onBridge) return;
     next.y = 1.72;
   } else {
@@ -548,8 +551,8 @@ function updateSpatialLabels() {
 function updateMinimap() {
   if (sceneMode !== 'exterior') return;
   const source = controlMode === 'roam' ? camera.position : controls.target;
-  const x = THREE.MathUtils.clamp((source.x + 60) / 120 * 230 + 5, 5, 235);
-  const y = THREE.MathUtils.clamp((source.z + 50) / 100 * 146 + 5, 5, 151);
+  const x = THREE.MathUtils.clamp((source.x + 62) / 124 * 216 + 12, 6, 234);
+  const y = THREE.MathUtils.clamp((82 - source.z) / 124 * 128 + 14, 6, 150);
   $('#map-visitor').setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
   const angle = controlMode === 'roam' ? lookYaw : controls.getAzimuthalAngle();
   $('#orientation svg').style.transform = `rotate(${-angle}rad)`;

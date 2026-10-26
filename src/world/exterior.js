@@ -26,11 +26,10 @@ function addTree(scene, trees, materials, x, z, scale = 1, seed = 0, kind = 'gre
   return tree;
 }
 
-// 会泽院前的大草坪与银杏道
+// 会泽院前的大草坪与喷泉
 function createLawn(scene, materials, trees) {
   const lawn = new THREE.Group();
   lawn.add(meshBox(26, .14, 20, materials.grass, 0, .03, 0));
-  // 草坪中央的喷泉小池
   const pool = new THREE.Mesh(new THREE.CylinderGeometry(2.1, 2.3, .5, 24), materials.stone);
   pool.position.y = .25;
   lawn.add(pool);
@@ -41,97 +40,142 @@ function createLawn(scene, materials, trees) {
   scene.add(lawn);
 }
 
-// 翠湖一角：水面、石桥、垂柳式绿树
+// 翠湖一角（校园南面、正门外）：水面、石桥、垂柳式绿树
 function createLake(scene, materials, trees, boats) {
   const lake = new THREE.Group();
-  lake.position.set(34, 0, 26);
-  const water = new THREE.Mesh(new THREE.PlaneGeometry(34, 22), materials.water);
+  lake.position.set(0, 0, 66);
+  const water = new THREE.Mesh(new THREE.PlaneGeometry(52, 26), materials.water);
   water.rotation.x = -Math.PI / 2;
   water.position.y = -.05;
   water.receiveShadow = true;
   lake.add(water);
-  for (const z of [-11.2, 11.2]) {
-    lake.add(meshBox(35, 1.2, .7, materials.stone, 0, -.15, z));
-    lake.add(meshBox(35, .18, .9, materials.plasterDark, 0, .5, z));
+  for (const z of [-13.2, 13.2]) {
+    lake.add(meshBox(53, 1.2, .7, materials.stone, 0, -.15, z));
+    lake.add(meshBox(53, .18, .9, materials.plasterDark, 0, .5, z));
   }
   scene.add(lake);
 
-  const bridge = createStoneBridge(materials, 3.2, 15);
-  bridge.position.set(34, 0, 26);
+  // 南门外主干道延伸过湖堤的石桥
+  const bridge = createStoneBridge(materials, 3.6, 18);
+  bridge.position.set(0, 0, 66);
   scene.add(bridge);
 
-  boats.push({ x: 27, z: 30, rotation: .12 });
-  boats.push({ x: 42, z: 22, rotation: -.1 });
+  boats.push({ x: -12, z: 70, rotation: .12 });
+  boats.push({ x: 14, z: 62, rotation: -.1 });
 }
 
 export function createExterior(materials) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#c8d6cf');
-  scene.fog = new THREE.Fog('#c8d6cf', 70, 150);
+  scene.fog = new THREE.Fog('#c8d6cf', 80, 170);
   const trees = [];
   const lanterns = [];
   const entranceMeshes = [];
   const boatAnchors = [];
 
-  const ground = meshBox(130, .5, 100, materials.grass, 0, -.35, 0);
+  const ground = meshBox(150, .5, 150, materials.grass, 0, -.35, 20);
   ground.castShadow = false;
   scene.add(ground);
 
-  // 主轴线：云大中路（南北向石板路）
-  const mainRoad = meshBox(8.4, .15, 108, materials.stone, 0, -.01, -4);
+  // 主轴线：云大中路（南北向石板路，南门 z=+48 → 会泽院 z=0 → 至公堂 z=-24）
+  const mainRoad = meshBox(8.4, .15, 112, materials.stone, 0, -.01, -2);
   mainRoad.castShadow = false;
   scene.add(mainRoad);
   for (const x of [-4.35, 4.35]) {
-    scene.add(meshBox(.25, .22, 108, materials.plasterDark, x, .06, -4));
+    scene.add(meshBox(.25, .22, 112, materials.plasterDark, x, .06, -2));
   }
-  // 东西向横路
-  for (const z of [-26, 14]) {
+  // 南门外延路（通向翠湖）
+  scene.add(meshBox(6, .12, 20, materials.stone, 0, -.02, 55));
+  // 东西向横路（映秋院 / 泽清堂一排）
+  for (const z of [-24, 4]) {
     const lane = meshBox(96, .12, 5.4, materials.stone, 0, -.02, z);
     lane.castShadow = false;
     scene.add(lane);
   }
 
-  // ============ 会泽院（地标 01，主楼） ============
+  // ============ 会泽院（地标 01，主楼，坐北朝南，居贡院中轴） ============
   const huize = addBuilding(scene, materials, {
-    width: 24, depth: 12, height: 5.4, x: 0, z: -22, sign: '會澤院',
+    width: 24, depth: 12, height: 5.4, x: 0, z: 0, sign: '會澤院',
     windows: 5, roofRise: 1.6, base: .9, style: 'huize'
   });
-  // 会泽院月台与大台阶
-  scene.add(meshBox(30, .5, 6.5, materials.stone, 0, .25, -14.8));
+  // 会泽院月台与"九十五级"龙门道台阶
+  scene.add(meshBox(30, .5, 6.5, materials.stone, 0, .25, 7.2));
   const stairs = createStairway(materials, 12, 6, .22);
-  stairs.position.set(0, .5, -11.2);
+  stairs.position.set(0, .5, 10.8);
   scene.add(stairs);
+  // 龙门道石牌坊意象
+  const paifang = new THREE.Group();
+  paifang.position.set(0, 0, 15.5);
+  for (const x of [-4.2, 4.2]) {
+    paifang.add(meshBox(.9, 4.6, .9, materials.stone, x, 2.3, 0));
+  }
+  paifang.add(meshBox(10.5, .8, 1.1, materials.stone, 0, 4.7, 0));
+  paifang.add(meshBox(.7, .55, 1.2, materials.redWall, 0, 5.35, 0));
+  scene.add(paifang);
 
-  // ============ 至公堂（地标 03，可入内） ============
+  // ============ 至公堂（地标 03，可入内；贡院中轴，会泽院之北） ============
   const zhigong = addBuilding(scene, materials, {
-    width: 20, depth: 10, height: 5, x: -28, z: 8, sign: '至公堂',
+    width: 20, depth: 10, height: 5, x: 0, z: -24, sign: '至公堂',
     windows: 3, roofRise: 2.2, base: .7, style: 'red', sideWindows: false
   });
   const zhigongEntrance = zhigong.userData.entrance;
   zhigongEntrance.userData.action = 'enterInterior';
   zhigongEntrance.userData.landmark = 'zhigong';
   entranceMeshes.push(zhigongEntrance);
-  scene.add(meshBox(22, .45, 3.6, materials.stone, -28, .2, 14.2));
+  scene.add(meshBox(22, .45, 3.6, materials.stone, 0, .2, -17.6));
 
-  // ============ 映秋院（地标 04） ============
-  const yingqiu = addBuilding(scene, materials, {
-    width: 16, depth: 9, height: 4.4, x: 28, z: 6, sign: '映秋院',
-    windows: 3, roofRise: 1.9, base: .55, style: 'red'
+  // ============ 革命烈士纪念碑（中轴，会泽院与至公堂之间） ============
+  const monument = new THREE.Group();
+  monument.position.set(0, 0, -12.5);
+  monument.add(meshBox(3.4, .5, 3.4, materials.stone, 0, .25, 0));
+  monument.add(meshBox(1.15, 4.2, .8, materials.stone, 0, 2.35, 0));
+  monument.add(meshBox(1.5, .45, 1.05, materials.stone, 0, 4.6, 0));
+  const monumentPlaque = new THREE.Mesh(new THREE.PlaneGeometry(.95, 2.6), materials.sign('英烈'));
+  monumentPlaque.position.set(0, 2.5, .42);
+  monument.add(monumentPlaque);
+  scene.add(monument);
+
+  // ============ 中轴东侧：熊庆来李广田故居（红墙小院） ============
+  addBuilding(scene, materials, {
+    width: 13, depth: 8, height: 4, x: 21, z: -12, sign: '故居',
+    windows: 2, roofRise: 1.7, base: .55, style: 'red'
+  });
+  addWall(scene, materials, 12, 21, -6.5, 0, 1.9);
+  // 东号舍（贡院考棚遗风，红墙长廊）
+  addWall(scene, materials, 20, 30, -24, Math.PI / 2, 2.2);
+
+  // ============ 中轴西侧：泽清堂（至公堂以西） ============
+  addBuilding(scene, materials, {
+    width: 13, depth: 8, height: 4.1, x: -22, z: -22, sign: '澤清堂',
+    windows: 2, roofRise: 1.7, base: .55, style: 'red'
   });
 
-  // ============ 贡院考棚遗风（两侧红墙长廊） ============
-  addWall(scene, materials, 18, -14, 8, 0, 2);
-  addWall(scene, materials, 16, 12, 8, 0, 2);
-  addWall(scene, materials, 14, -40, -4, Math.PI / 2, 2.2);
-  addWall(scene, materials, 14, 40, -6, Math.PI / 2, 2.2);
+  // ============ 映秋院（地标 04；至公堂以西、泽清堂之南，梁思成林徽因设计） ============
+  const yingqiu = addBuilding(scene, materials, {
+    width: 16, depth: 9, height: 4.4, x: -26, z: 6, sign: '映秋院',
+    windows: 3, roofRise: 1.9, base: .55, style: 'red'
+  });
+  // 映秋院月台
+  scene.add(meshBox(18, .45, 3.2, materials.stone, -26, .2, 11.5));
 
-  // 会泽院两翼
-  addBuilding(scene, materials, { width: 10, depth: 7, height: 4, x: -18, z: -24, windows: 2, roofRise: 1.6, base: .6 });
-  addBuilding(scene, materials, { width: 10, depth: 7, height: 4, x: 18, z: -24, windows: 2, roofRise: 1.6, base: .6 });
+  // ============ 钟楼（1955 水塔兼钟楼，校区西北） ============
+  const clockTower = createClockTower(materials);
+  clockTower.position.set(-40, 0, 12);
+  scene.add(clockTower);
+  // 云南第一天文点（钟楼后侧，文津楼旁意象）
+  const astroPoint = new THREE.Group();
+  astroPoint.position.set(-40, 0, 22);
+  astroPoint.add(meshBox(3.2, .55, 3.2, materials.stone, 0, .27, 0));
+  astroPoint.add(meshBox(1.5, 1.15, 1.5, materials.stone, 0, .95, 0));
+  scene.add(astroPoint);
 
-  // ============ 校门（地标 02 起点） ============
+  // 会泽院两翼配楼
+  addBuilding(scene, materials, { width: 10, depth: 7, height: 4, x: -18, z: -2, windows: 2, roofRise: 1.6, base: .6 });
+  addBuilding(scene, materials, { width: 10, depth: 7, height: 4, x: 18, z: -2, windows: 2, roofRise: 1.6, base: .6 });
+
+  // ============ 校门（地标 02 起点，南门，坐南朝北迎银杏道） ============
   const gate = new THREE.Group();
-  gate.position.set(0, 0, 46);
+  gate.position.set(0, 0, 48);
   for (const x of [-5.6, 5.6]) {
     gate.add(meshBox(1.3, 5.4, 1.3, materials.redWall, x, 2.7, 0));
     gate.add(meshBox(1.5, .45, 1.5, materials.stone, x, .22, 0));
@@ -146,17 +190,17 @@ export function createExterior(materials) {
   gatePlaque.position.set(.42, 4.9, 0);
   gate.add(gatePlaque);
   scene.add(gate);
-  scene.add(meshBox(14, .3, 3, materials.stone, 0, .1, 42.5));
+  scene.add(meshBox(14, .3, 3, materials.stone, 0, .1, 44.5));
 
-  // ============ 银杏道（校门至会泽院两侧） ============
+  // ============ 银杏道（校门至会泽院两侧，沿中轴） ============
   for (const x of [-8.5, 8.5]) {
     for (let i = 0; i < 5; i++) {
-      addTree(scene, trees, materials, x, 38 - i * 9, .85 + (i % 2) * .25, i * 3 + (x > 0 ? 1 : 0), 'ginkgo');
+      addTree(scene, trees, materials, x, 40 - i * 9, .85 + (i % 2) * .25, i * 3 + (x > 0 ? 1 : 0), 'ginkgo');
     }
   }
   // 银杏道灯柱与灯笼
   for (const x of [-6.6, 6.6]) {
-    for (const z of [34, 20, 4]) {
+    for (const z of [36, 22, 6]) {
       const lantern = createLantern(materials, .8);
       lantern.position.set(x, 3.6, z);
       scene.add(lantern);
@@ -165,34 +209,26 @@ export function createExterior(materials) {
     }
   }
 
-  // 大草坪（会泽院前）
+  // 大草坪（会泽院前，中轴两侧）
   const lawn = new THREE.Group();
-  lawn.position.set(0, 0, -2);
+  lawn.position.set(0, 0, 12);
   createLawn(scene, materials, trees);
-  lawn.position.set(0, 0, 0);
-  // 实际放在 z=-2 附近
-  scene.children[scene.children.length - 1].position.set(0, 0, -2);
 
-  // ============ 翠湖一角 ============
+  // ============ 翠湖一角（南门外） ============
   createLake(scene, materials, trees, boatAnchors);
 
-  // ============ 钟楼 ============
-  const clockTower = createClockTower(materials);
-  clockTower.position.set(-44, 0, 24);
-  scene.add(clockTower);
-
   // 周边院落与树木
-  addBuilding(scene, materials, { width: 12, depth: 7, height: 3.9, x: -46, z: -22, windows: 2, roofRise: 1.6 });
-  addBuilding(scene, materials, { width: 13, depth: 7, height: 4, x: 46, z: -24, windows: 3, rotation: Math.PI, roofRise: 1.7 });
-  addBuilding(scene, materials, { width: 12, depth: 7, height: 3.8, x: -50, z: 40, windows: 2, rotation: Math.PI, roofRise: 1.6 });
-  addBuilding(scene, materials, { width: 13, depth: 7, height: 4, x: 50, z: 44, windows: 2, rotation: Math.PI, roofRise: 1.7 });
+  addBuilding(scene, materials, { width: 12, depth: 7, height: 3.9, x: -46, z: -30, windows: 2, roofRise: 1.6 });
+  addBuilding(scene, materials, { width: 13, depth: 7, height: 4, x: 46, z: -32, windows: 3, rotation: Math.PI, roofRise: 1.7 });
+  addBuilding(scene, materials, { width: 12, depth: 7, height: 3.8, x: -52, z: 36, windows: 2, rotation: Math.PI, roofRise: 1.6 });
+  addBuilding(scene, materials, { width: 13, depth: 7, height: 4, x: 52, z: 40, windows: 2, rotation: Math.PI, roofRise: 1.7 });
 
   [
-    [-24, -34, 1.1], [-38, -36, 1.2], [-12, -36, 1], [12, -36, .95], [26, -34, 1.15],
-    [40, -34, 1.1], [-22, 20, .9], [-36, 26, 1.05], [-18, 32, 1.1], [16, 22, .85],
-    [22, 30, .95], [46, 8, .9], [-46, 12, 1], [-52, 30, 1.1], [54, 30, 1],
-    [-8, 20, .8], [8, 26, .85], [-30, -8, 1.05], [30, -10, .95], [-56, -6, 1.1],
-    [56, -8, 1.05], [14, 40, .9], [-14, 42, .85]
+    [-24, -38, 1.1], [-38, -40, 1.2], [-12, -40, 1], [12, -40, .95], [26, -38, 1.15],
+    [40, -38, 1.1], [-16, 22, .9], [-34, 28, 1.05], [-50, 26, 1.1], [16, 24, .85],
+    [30, 30, .95], [46, 4, .9], [-46, 2, 1], [-56, 20, 1.1], [56, 24, 1],
+    [-8, 30, .8], [8, 34, .85], [-24, -6, 1.05], [30, -8, .95], [-56, -14, 1.1],
+    [56, -16, 1.05], [14, 44, .9], [-14, 46, .85], [-20, 34, .95], [22, 36, .9]
   ].forEach(([x, z, scale], index) => addTree(scene, trees, materials, x, z, scale, index));
 
   // 灯光
@@ -202,9 +238,9 @@ export function createExterior(materials) {
   sun.position.set(-35, 58, 28);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
-  sun.shadow.camera.left = -75; sun.shadow.camera.right = 75;
-  sun.shadow.camera.top = 62; sun.shadow.camera.bottom = -62;
-  sun.shadow.camera.near = 1; sun.shadow.camera.far = 160;
+  sun.shadow.camera.left = -85; sun.shadow.camera.right = 85;
+  sun.shadow.camera.top = 85; sun.shadow.camera.bottom = -85;
+  sun.shadow.camera.near = 1; sun.shadow.camera.far = 200;
   sun.shadow.bias = -.00025;
   sun.shadow.normalBias = .035;
   scene.add(sun);
