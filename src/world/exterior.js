@@ -26,17 +26,10 @@ function addTree(scene, trees, materials, x, z, scale = 1, seed = 0, kind = 'gre
   return tree;
 }
 
-// 会泽院前的大草坪与喷泉
+// 会泽院前的大草坪（龙门道两侧）
 function createLawn(scene, materials, trees) {
   const lawn = new THREE.Group();
-  lawn.add(meshBox(26, .14, 20, materials.grass, 0, .03, 0));
-  const pool = new THREE.Mesh(new THREE.CylinderGeometry(2.1, 2.3, .5, 24), materials.stone);
-  pool.position.y = .25;
-  lawn.add(pool);
-  const water = new THREE.Mesh(new THREE.CircleGeometry(1.9, 24), materials.water);
-  water.rotation.x = -Math.PI / 2;
-  water.position.y = .48;
-  lawn.add(water);
+  lawn.add(meshBox(20, .14, 16, materials.grass, 0, .03, 0));
   scene.add(lawn);
 }
 
@@ -87,11 +80,13 @@ export function createExterior(materials) {
   // 南门外延路（通向翠湖）
   scene.add(meshBox(6, .12, 20, materials.stone, 0, -.02, 55));
   // 东西向横路（映秋院 / 泽清堂一排）
-  for (const z of [-24, 4]) {
+  for (const z of [-22, 4]) {
     const lane = meshBox(96, .12, 5.4, materials.stone, 0, -.02, z);
     lane.castShadow = false;
     scene.add(lane);
   }
+  // 至公堂后短横路（通怀周楼）
+  scene.add(meshBox(40, .12, 4.6, materials.stone, 0, -.02, -33));
 
   // ============ 会泽院（地标 01，主楼，坐北朝南，居贡院中轴） ============
   const huize = addBuilding(scene, materials, {
@@ -103,6 +98,14 @@ export function createExterior(materials) {
   const stairs = createStairway(materials, 12, 6, .22);
   stairs.position.set(0, .5, 10.8);
   scene.add(stairs);
+  // 九五台阶中段平台的西式喷水池（真实位置）
+  const fountainBase = new THREE.Mesh(new THREE.CylinderGeometry(2.1, 2.3, .5, 24), materials.stone);
+  fountainBase.position.set(-9.5, .25, 9);
+  scene.add(fountainBase);
+  const fountainWater = new THREE.Mesh(new THREE.CircleGeometry(1.9, 24), materials.water);
+  fountainWater.rotation.x = -Math.PI / 2;
+  fountainWater.position.set(-9.5, .48, 9);
+  scene.add(fountainWater);
   // 龙门道石牌坊意象
   const paifang = new THREE.Group();
   paifang.position.set(0, 0, 15.5);
@@ -144,30 +147,51 @@ export function createExterior(materials) {
   // 东号舍（贡院考棚遗风，红墙长廊）
   addWall(scene, materials, 20, 30, -24, Math.PI / 2, 2.2);
 
-  // ============ 中轴西侧：泽清堂（至公堂以西） ============
-  addBuilding(scene, materials, {
-    width: 13, depth: 8, height: 4.1, x: -22, z: -22, sign: '澤清堂',
-    windows: 2, roofRise: 1.7, base: .55, style: 'red'
-  });
-
-  // ============ 映秋院（地标 04；至公堂以西、泽清堂之南，梁思成林徽因设计） ============
+  // ============ 中轴西侧：映秋院（与至公堂几乎同排，梁思成林徽因设计） ============
   const yingqiu = addBuilding(scene, materials, {
-    width: 16, depth: 9, height: 4.4, x: -26, z: 6, sign: '映秋院',
+    width: 16, depth: 9, height: 4.4, x: -26, z: -22, sign: '映秋院',
     windows: 3, roofRise: 1.9, base: .55, style: 'red'
   });
   // 映秋院月台
-  scene.add(meshBox(18, .45, 3.2, materials.stone, -26, .2, 11.5));
+  scene.add(meshBox(18, .45, 3.2, materials.stone, -26, .2, -16.6));
+  // 泽清堂（映秋院东北侧，卢汉夫人龙泽清捐建，女生食堂）
+  addBuilding(scene, materials, {
+    width: 13, depth: 8, height: 4.1, x: -15, z: -33, sign: '澤清堂',
+    windows: 2, roofRise: 1.7, base: .55, style: 'red'
+  });
+  // 风节亭（贡院旧迹，映秋院与泽清堂之间）
+  const pavilion = new THREE.Group();
+  pavilion.position.set(-25, 0, -34);
+  for (const [px, pz] of [[-1.6, -1.6], [1.6, -1.6], [-1.6, 1.6], [1.6, 1.6]]) {
+    pavilion.add(cylinderBetween([px, 0, pz], [px, 2.6, pz], .14, materials.redWall, 6));
+  }
+  pavilion.add(meshBox(4.6, .3, 4.6, materials.stone, 0, .15, 0));
+  const pavilionRoof = createRoof(materials, 5.2, 1.5, .6);
+  pavilionRoof.position.y = 2.6;
+  pavilion.add(pavilionRoof);
+  scene.add(pavilion);
 
-  // ============ 钟楼（1955 水塔兼钟楼，校区西北） ============
+  // ============ 钟楼（1955 水塔兼钟楼，会泽院西北） ============
   const clockTower = createClockTower(materials);
-  clockTower.position.set(-40, 0, 12);
+  clockTower.position.set(-40, 0, -9);
   scene.add(clockTower);
-  // 云南第一天文点（钟楼后侧，文津楼旁意象）
+  // 云南第一天文点（钟楼与文津楼之间）
   const astroPoint = new THREE.Group();
-  astroPoint.position.set(-40, 0, 22);
+  astroPoint.position.set(-45, 0, -8);
   astroPoint.add(meshBox(3.2, .55, 3.2, materials.stone, 0, .27, 0));
   astroPoint.add(meshBox(1.5, 1.15, 1.5, materials.stone, 0, .95, 0));
   scene.add(astroPoint);
+  // 文津楼意象（天文点紧靠文津楼）
+  addBuilding(scene, materials, {
+    width: 12, depth: 8, height: 4.2, x: -52, z: -9, sign: '文津樓',
+    windows: 3, roofRise: 1.5, base: .5
+  });
+
+  // ============ 怀周楼（中轴最北端，至公堂之后） ============
+  addBuilding(scene, materials, {
+    width: 14, depth: 8, height: 4.8, x: 0, z: -36, sign: '懷周樓',
+    windows: 3, roofRise: 1.2, base: .5
+  });
 
   // 会泽院两翼配楼
   addBuilding(scene, materials, { width: 10, depth: 7, height: 4, x: -18, z: -2, windows: 2, roofRise: 1.6, base: .6 });
@@ -192,15 +216,15 @@ export function createExterior(materials) {
   scene.add(gate);
   scene.add(meshBox(14, .3, 3, materials.stone, 0, .1, 44.5));
 
-  // ============ 银杏道（校门至会泽院两侧，沿中轴） ============
+  // ============ 银杏道（会泽院北侧：从文渊楼延伸到会泽院，真实位置） ============
   for (const x of [-8.5, 8.5]) {
-    for (let i = 0; i < 5; i++) {
-      addTree(scene, trees, materials, x, 40 - i * 9, .85 + (i % 2) * .25, i * 3 + (x > 0 ? 1 : 0), 'ginkgo');
+    for (let i = 0; i < 4; i++) {
+      addTree(scene, trees, materials, x, -4 - i * 5.4, .85 + (i % 2) * .25, i * 3 + (x > 0 ? 1 : 0), 'ginkgo');
     }
   }
   // 银杏道灯柱与灯笼
   for (const x of [-6.6, 6.6]) {
-    for (const z of [36, 22, 6]) {
+    for (const z of [-6, -12, -18]) {
       const lantern = createLantern(materials, .8);
       lantern.position.set(x, 3.6, z);
       scene.add(lantern);
@@ -208,27 +232,33 @@ export function createExterior(materials) {
       lanterns.push(lantern);
     }
   }
+  // 九五台阶两旁松柏（真实：龙门道两旁为松柏、柳树）
+  [[-7.2, 13.5], [7.2, 13.5], [-7.4, 8.6], [7.4, 8.6], [-8, 19], [8, 19],
+   [-10, 28], [10, 28], [-9, 36], [9, 36], [-8, 43], [8, 43]].forEach(([x, z], index) => {
+    addTree(scene, trees, materials, x, z, .95 + (index % 3) * .12, index + 40);
+  });
 
-  // 大草坪（会泽院前，中轴两侧）
+  // 大草坪（龙门道东侧）
   const lawn = new THREE.Group();
-  lawn.position.set(0, 0, 12);
+  lawn.position.set(13, 0, 10);
   createLawn(scene, materials, trees);
 
   // ============ 翠湖一角（南门外） ============
   createLake(scene, materials, trees, boatAnchors);
 
   // 周边院落与树木
-  addBuilding(scene, materials, { width: 12, depth: 7, height: 3.9, x: -46, z: -30, windows: 2, roofRise: 1.6 });
+  addBuilding(scene, materials, { width: 12, depth: 7, height: 3.9, x: -46, z: -32, windows: 2, roofRise: 1.6 });
   addBuilding(scene, materials, { width: 13, depth: 7, height: 4, x: 46, z: -32, windows: 3, rotation: Math.PI, roofRise: 1.7 });
   addBuilding(scene, materials, { width: 12, depth: 7, height: 3.8, x: -52, z: 36, windows: 2, rotation: Math.PI, roofRise: 1.6 });
   addBuilding(scene, materials, { width: 13, depth: 7, height: 4, x: 52, z: 40, windows: 2, rotation: Math.PI, roofRise: 1.7 });
 
   [
-    [-24, -38, 1.1], [-38, -40, 1.2], [-12, -40, 1], [12, -40, .95], [26, -38, 1.15],
-    [40, -38, 1.1], [-16, 22, .9], [-34, 28, 1.05], [-50, 26, 1.1], [16, 24, .85],
-    [30, 30, .95], [46, 4, .9], [-46, 2, 1], [-56, 20, 1.1], [56, 24, 1],
-    [-8, 30, .8], [8, 34, .85], [-24, -6, 1.05], [30, -8, .95], [-56, -14, 1.1],
-    [56, -16, 1.05], [14, 44, .9], [-14, 46, .85], [-20, 34, .95], [22, 36, .9]
+    [-24, -42, 1.1], [-38, -44, 1.2], [-12, -44, 1], [12, -44, .95], [26, -42, 1.15],
+    [40, -42, 1.1], [-16, 24, .9], [-34, 30, 1.05], [-50, 28, 1.1], [16, 26, .85],
+    [30, 32, .95], [46, 2, .9], [-46, -20, 1], [-56, 22, 1.1], [56, 26, 1],
+    [-16, 2, .8], [26, 2, .85], [-28, -14, 1.05], [32, -10, .95], [-56, -24, 1.1],
+    [56, -18, 1.05], [14, 44, .9], [-14, 46, .85], [-22, 38, .95], [24, 40, .9],
+    [-34, -16, 1], [-36, -2, .95]
   ].forEach(([x, z, scale], index) => addTree(scene, trees, materials, x, z, scale, index));
 
   // 灯光

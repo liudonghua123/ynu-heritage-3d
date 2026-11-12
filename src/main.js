@@ -552,7 +552,8 @@ function updateMinimap() {
   if (sceneMode !== 'exterior') return;
   const source = controlMode === 'roam' ? camera.position : controls.target;
   const x = THREE.MathUtils.clamp((source.x + 62) / 124 * 216 + 12, 6, 234);
-  const y = THREE.MathUtils.clamp((82 - source.z) / 124 * 128 + 14, 6, 150);
+  // 3D 里 +z 是南，地图上向下（y 增大）是南：z 越大 y 越大
+  const y = THREE.MathUtils.clamp((source.z + 62) / 124 * 128 + 14, 6, 150);
   $('#map-visitor').setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
   const angle = controlMode === 'roam' ? lookYaw : controls.getAzimuthalAngle();
   $('#orientation svg').style.transform = `rotate(${-angle}rad)`;
